@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   getDogs()
+  document.getElementById("dog-form").addEventListener("submit", saveDog)
 })
 
 function getDogs() {
@@ -10,6 +11,7 @@ function getDogs() {
 
 function displayDogs(dogs) {
   let tableBody = document.getElementById("table-body")
+  tableBody.innerHTML = ""
 
   dogs.forEach(dog => {
     let tableRow = document.createElement("tr")
@@ -40,7 +42,37 @@ function editDog(dogId) {
 
 function fillForm(dog) {
   let dogForm = document.getElementById("dog-form")
+  dogForm.dataset.id = dog.id
   dogForm.name.value = dog.name
   dogForm.breed.value = dog.breed
   dogForm.sex.value = dog.sex
+}
+
+function saveDog(e) {
+  e.preventDefault()
+  let dogForm = document.getElementById("dog-form")
+
+  let dog = e.target
+  let dogId = dog.dataset.id
+
+  let formData = {
+    name: dog.name.value,
+    breed: dog.breed.value,
+    sex: dog.sex.value,
+  }
+  dogForm.reset()
+  saveDogToDB(formData, dogId)
+}
+
+function saveDogToDB(formData, dogId) {
+  fetch(`http://localhost:3000/dogs/${dogId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(formData),
+  })
+    .then(r => r.json())
+    .then(() => getDogs())
 }
